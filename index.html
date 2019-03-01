@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Nightlight</title>
+        <style>
+            canvas {
+                position: absolute;
+                left: 0px;
+                top: 0px;
+            }
+        </style>
+    </head>
+    <body id="body">
+        <canvas id="game" width="600px" height="600px"></canvas>
+        <!-- Script tag for JavaScript -->
+        <script>
+        // by green ghost
+        {
+            // Get the body element.
+            var body = document.getElementById("body");
+            
+            // Gets the canvas element and allows the user to draw on the canvas.
+            var canvas = document.getElementById("game");
+            canvas.width = window.innerWidth;
+            var ctx = canvas.getContext("2d");
+            
+            // Variables hold the width and height of the canvas.
+            var width = canvas.width;
+            var height = canvas.height;
+            
+            // Controls whether to draw the stroke or fill
+            var isStroke = true;
+            var isFill = true;
+            
+            // A draw function for animation.
+            function draw() {};
+            
+            // A keyPressed function for key events.
+            function keyPressed() {};
+            
+            // A keyReleased function for key events.
+            function keyReleased() {};
+            
+            // A keyPressed function for when the user clicks.
+            function mouseClicked() {};
+            
+            // The frameRate variable controls animation speed.
+            var frameRate = 60;
+            
+            // Counts frames.
+            var frameCount = 0;
+            
+            // Positions of the mouse.
+            var mouseX, mouseY;
+            
+            // A keyCode variable.
+            var keyCode;
+            
+            // Key code constants.
+            var LEFT = 37,
+                RIGHT = 39,
+                UP = 38,
+                DOWN = 40;
+                
+            // Holds current text size.
+            var txtSize = 20;
+            
+            /** Makes functions similar to the Processing JS functions. **/
+            // {
+                // Returns a random number in a certain range.
+                function random(min, max) {
+                    if (!min) {
+                        return Math.random();
+                    }
+                    if (!max) {
+                        max = min;
+                        min = 0;
+                    }
+                    return min + Math.random() * (max - min);
+                };
+            
+                // Makes a color (returns a string).
+                function color(r, g, b, a) {
+                    a = a === undefined ? 1 : a / 255;
+                    r = Math.floor(r);
+                    g = Math.floor(g);
+                    b = Math.floor(b);
+                    return "rgba(" + r + ", " + g + ", " + b + ", " + a + ")";
+                };
+                
+                // Sets fill color.
+                function fill(r, g, b, a) {
+                    isFill = true;
+                    if (typeof r === "string") {
+                        ctx.fillStyle = r;
+                    } else {
+                        ctx.fillStyle = color(r, g, b, a);
+                    }
+                };
+                
+                // Sets stroke color.
+                function stroke(r, g, b, a) {
+                    isStroke = true;
+                    ctx.strokeStyle = color(r, g, b, a);
+                };
+                
+                // Gets rid of stroke.
+                function noStroke() {
+                    isStroke = false;
+                };
+                
+                // Gets rid of fill.
+                function noFill() {
+                    isFill = false;
+                };
+                
+                // Constrains a number to a certain range.
+                function constrain(num, min, max) {
+                    return Math.max(Math.min(num, max), min);
+                };
+                
+                // Finds the distance between two points.
+                function dist(x1, y1, x2, y2) {
+                    return Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+                };
+                
+                // A sine function that converts from radians to degrees.
+                function sin(angle) {
+                    return Math.sin(angle / 180 * Math.PI);
+                };
+                
+                // A cosine function that converts from radians to degrees.
+                function cos(angle) {
+                    return Math.cos(angle / 180 * Math.PI);
+                };
+                
+                // An atan2 function.
+                function atan2(x, y) {
+                    return Math.atan2(x, y);
+                };
+                
+                // Translates to a certain point.
+                function translate(x, y) {
+                    ctx.translate(x, y);
+                };
+                
+                // Scales the drawing.
+                function scale(w, h) {
+                    if (h === undefined) {
+                        ctx.scale(w, w);
+                        return;
+                    }
+                    ctx.scale(w, h);
+                };
+                
+                // Rotates the drawing.
+                function rotate(angle) {
+                    ctx.rotate(angle / 180 * Math.PI)
+                };
+                
+                // Starts transformation.
+                function pushMatrix() {
+                    ctx.save();
+                };
+                
+                // Finishes transformation.
+                function popMatrix() {
+                    ctx.restore();
+                };
+                
+                // Sets the width of lines.
+                function strokeWeight(width) {
+                    ctx.lineWidth = width;
+                };
+                
+                // Starts a complex shape.
+                function beginShape() {
+                    ctx.beginPath();
+                };
+                
+                // Closes a complex shape.
+                function endShape() {
+                    if (isFill) {
+                        ctx.fill();
+                    }
+                    if (isStroke) {
+                        ctx.stroke();
+                    }
+                };
+                
+                // Sets the position of the path.
+                function setPath(x, y) {
+                    ctx.moveTo(x, y);
+                };
+                
+                // Draws a vertex for a complex shape.
+                function vertex(x, y) {
+                    ctx.lineTo(x, y);
+                };
+                
+                // Draws a curve vertex for a complex shape.
+                function curveVertex(cx, cy, x, y) {
+                    ctx.quadraticCurveTo(cx, cy, x, y);
+                };
+                
+                // Draws a bezier vertex for a complex shape.
+                function bezierVertex(cx1, cy1, cx2, cy2, x, y) {
+                    ctx.bezierCurveTo(cx1, cy1, cx2, cy2, x, y);
+                };
+                
+                // Draws a curve.
+                function curve(x1, y1, cx, cy, x2, y2) {
+                    beginShape();
+                    setPath(x1, y1);
+                    curveVertex(cx, cy, x2, y2);
+                    endShape();
+                };
+                
+                // Draws a bezier.
+                function bezier(x1, y1, cx1, cy1, cx2, cy2, x2, y2) {
+                    beginShape();
+                    setPath(x1, y1);
+                    bezierVertex(cx1, cy1, cx2, cy2, x2, y2);
+                    endShape();
+                };
+                
+                // Draws a line.
+                function line(x1, y1, x2, y2) {
+                    beginShape();
+                    vertex(x1, y1);
+                    vertex(x2, y2);
+                    endShape();
+                };
+                
+                // Draws a rectangle.
+                function rect(x, y, w, h, r, r2, r3, r4) {
+                    r = r || 0;
+                    r = constrain(r, -Math.min(w, h) / 2, Math.min(w, h) / 2);
+                    if (r2 === undefined || r3 === undefined || r4 === undefined) {
+                        r2 = r;
+                        r3 = r;
+                        r4 = r;
+                    }
+                    beginShape();
+                    setPath(x, y + r);
+                    curveVertex(x, y, x + r, y);
+                    vertex(x + w - r2, y);
+                    curveVertex(x + w, y, x + w, y + r2);
+                    vertex(x + w, y + h - r3);
+                    curveVertex(x + w, y + h, x + w - r3, y + h);
+                    vertex(x + r4, y + h);
+                    curveVertex(x, y + h, x, y + h - r4);
+                    vertex(x, y + r);
+                    endShape();
+                };
+                
+                // Draws an arc.
+                function arc(x, y, w, h, start, stop) {
+                    pushMatrix();
+                    beginShape();
+                    translate(x, y);
+                    scale(1, h / w);
+                    ctx.arc(0, 0, w / 2, start / 180 * Math.PI, stop / 180 * Math.PI);
+                    endShape();
+                    popMatrix();
+                };
+                
+                // Draws an ellipse.
+                function ellipse(x, y, w, h) {
+                    arc(x, y, w, h, 0, 360);
+                };
+                
+                // Draws a triangle.
+                function triangle(x1, y1, x2, y2, x3, y3) {
+                    beginShape();
+                    vertex(x1, y1);
+                    vertex(x2, y2);
+                    vertex(x3, y3);
+                    vertex(x1, y1);
+                    endShape();
+                };
+                
+                // Draws a quad.
+                function quad(x1, y1, x2, y2, x3, y3, x4, y4) {
+                    beginShape();
+                    vertex(x1, y1);
+                    vertex(x2, y2);
+                    vertex(x3, y3);
+                    vertex(x4, y4);
+                    vertex(x1, y1);
+                    endShape();
+                };
+                
+                // Fills the background.
+                function background(r, g, b, a) {
+                    let prev = ctx.fillStyle;
+                    var wasStroke;
+                    if (isStroke) {
+                        wasStroke = true;
+                        isStroke = false;
+                    }
+                    fill(r, g, b, a);
+                    ctx.fillRect(0, 0, width, height);
+                    fill(prev);
+                    if (wasStroke) {
+                        isStroke = true;
+                    }
+                };
+                
+                // Sets text font.
+                function textFont(font, size) {
+                    size = size || txtSize;
+                    txtSize = size;
+                    ctx.font = size + "px " + font;
+                };
+                
+                // Sets text size.
+                function textSize(size) {
+                    txtSize = size || 20;
+                };
+                
+                // Sets text alignment.
+                function textAlign(align, baseline) {
+                    ctx.textAlign = align;
+                    ctx.textBaseline = baseline;
+                };
+                
+                // Draws text.
+                function text(txt, x, y) {
+                    ctx.fillText(txt, x, y);
+                };
+                
+                // Changes the cursor.
+                function cursor(name) {
+                    document.body.style.cursor = name;
+                };
+            // }
+        }
+            
+        var l = 0, p = false;
+        var mb = [
+            [
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "               1    ",
+                "   0    0 0    0    ",
+                "                    ",
+                "0                   ",
+                "                    ",
+                "                    ",
+                "   00000000         ",
+                "              0     ",
+                "                  0 ",
+                "                    ",
+                "                    ",
+                "              00000 ",
+                "      0      0      ",
+                "00000000000000000000"
+            ], [
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "   00  000000   0   ",
+                "    00         00   ",
+                "     000      00    ",
+                "       00000 0      ",
+                "                    ",
+                "                    ",
+                "       000000000  0 ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                 1  ",
+                "               0000 ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    "
+            ], [
+                "                    ",
+                "1                   ",
+                "0                   ",
+                "                    ",
+                "0   000 000 000 0   ",
+                "    0   0 0 0 0 0   ",
+                "    000 000 000 000 ",
+                "0                   ",
+                "                    ",
+                "                    ",
+                "0                   ",
+                "                    ",
+                "                    ",
+                "0                   ",
+                "                    ",
+                "                    ",
+                "0                   ",
+                "                    ",
+                "0000                ",
+                "    0000000000000000"
+                
+            ], [
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                   1",
+                "           0        ",
+                "          0         ",
+                "         0          ",
+                "      0 0           ",
+                "00000 000           ",
+                "      0 0           ",
+                " 000000 0           ",
+                "      0 0           ",
+                "00000 0 0           ",
+                "      0 0           ",
+                " 000000 0           ",
+                "      000           ",
+                "00000  10           ",
+                "000000000           "
+                
+            ], [
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                " 0 0 000 0 0        ",
+                " 000 0 0 0 0        ",
+                "  0  000 000        ",
+                "                    ",
+                "       0 0 0 0 00 0 ",
+                "       0 0 0 0 0 00 ",
+                "       00000 0 0  0 ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "                    ",
+                "00000000000000000000"
+                
+            ]
+        ];
+        var m;
+        var pos = [[50, 400], [300, 10], [500, 500], [20, 250], [20, 10]];
+        var px = pos[l][0],py = pos[l][1],k= {}, b_size = 30,g=0,cj =false,x2,y2;
+        var fade = 255;
+        
+        var c = function(p1, p2) {
+            return p1.x + b_size > p2.x && p1.x - b_size < p2.x && p1.y + b_size > p2.y && p1.y - b_size < p2.y;
+        };
+        draw = function() {
+            if (p) {
+            noStroke();
+            m = mb[l];
+            background(0, 0, 50);
+            x2=px;
+            y2= py;
+            fill(255, 255, 0);
+            rect(px, py, b_size, b_size);
+            fill(255, 255, 100, 60);
+            ellipse(px + b_size / 2, py + b_size / 2, b_size * 3, b_size * 3);
+            fill(255, 255, 255);
+            stroke(0, 0, 0);
+            strokeWeight(3);
+            ellipse(px + b_size / 4, py + b_size / 3, b_size / 4, b_size / 4);
+            ellipse(px + b_size / 4 * 3, py + b_size / 3, b_size / 4, b_size / 4);
+            noStroke();
+            if (k[LEFT]) {
+                px -= 3;
+            }
+            if (k[RIGHT]) {
+                px += 3;
+            }
+            for (var i = 0; i < m.length;i++){
+                for (var j = 0;j <m[i].length;j++){
+                fill(200 + sin(i * 50 + j * 50) * 50 - dist(j * b_size, i * b_size, px, py), 200 - dist(j * b_size, i * b_size, px, py) /1.5, constrain(200 - dist(j * b_size, i * b_size, px, py), 50, 255));
+                    if(m[i][j]!==" "){
+                        if (m[i][j] === "0") {
+                            rect(j * b_size, i * b_size, b_size, b_size);
+                        } else {
+                            fill(25 + sin(frameCount * 20) * 150,255, sin(frameCount * 20) * 150);
+                            rect(j * b_size, i * b_size, b_size, b_size, 30);
+                        }
+                    if (c({x : px, y : py}, {x : j * b_size, y: i * b_size})) {
+                        if (m[i][j] === "1") {
+                            l ++;
+                px = pos[l][0];
+                py = pos[l][1];
+                g = 0;
+                break;
+                        }
+                            if (x2 < j * b_size) {
+                                px = j * b_size - b_size;
+                            } else {
+                                px = j * b_size + b_size;
+                            }
+                        }
+                    }
+                }
+            }
+            if (k[UP] && cj) {
+                g = -10;
+            }
+            g += 0.5;
+            py += g;
+            cj = false;
+            for (var i = 0; i < m.length;i++){
+                for (var j = 0;j <m[i].length;j++){
+                    if(m[i][j]!==" "){
+                        if (c({x : px, y : py}, {x : j * b_size, y: i * b_size})) {
+                            if (m[i][j] === "1") {
+                            l ++;
+                px = pos[l][0];
+                py = pos[l][1];
+                g = 0;
+                break;
+                        }
+                            if (y2 < i * b_size) {
+                                py = i * b_size - b_size;
+                                cj = true;
+                            } else {
+                                py = i * b_size + b_size;
+                            }
+                            g = 0;
+                        }
+                    }
+                }
+            }
+            if (py > height) {
+                px = pos[l][0];
+                py = pos[l][1];
+                g = 0;
+            }
+            noStroke();
+            fill(0, 0, 0, fade);
+            rect(0, 0,width, height);
+            fade -= 15;
+            } else {
+                background(240, 120,0);
+                fill(255, 255, 255, 100);
+                noStroke();
+                for (var i = 0; i < 180; i += 5) {
+                    ellipse(300 +sin(i * 2+frameCount / 5) * 320, 300-cos(i * 2 + frameCount / 5) * 320, 20 + sin(i *117) * 5, 20+ sin(i *117) * 5);
+                }
+                for(var i=0; i < 300; i++){
+                    stroke(255, 50, 255,i /3);
+                    line(0, i + 300, 600, i+300);
+                }
+                noStroke();
+                textFont("monospace", 80);
+                textAlign("center", "center");
+                fill(255, 255, 255, 40);
+                for (var i = 0; i < 10; i++) {
+                    text("Nightlight", 300, 101 + i);
+                }
+                cursor("default");
+                fill(100, 100, 110);
+                if (mouseX > 200 && mouseY > 380 && mouseX < 400 && mouseY < 420) {
+                    fill(120, 120, 110);
+                    cursor("pointer");
+                }
+                rect(200, 380, 200, 40);
+                
+                fill(0, 0, 0);
+                text("Nightlight", 300, 100);
+                textFont("sans-serif", 30);
+                text("A platformer", 300, 140);
+                text("coolprogrammer2 --- 2019", 300, 580);
+                text("PLAY", 300, 410);
+                for (var i = 0; i < 10; i++) {
+                    pushMatrix();
+                    translate(i * 50, 0);
+                    fill(255 - i * 15, 255 - i * 15, i * 15);
+                    rect(50, 250, b_size, b_size);
+                    fill(255, 255, 255);
+                    stroke(0, 0, 0);
+                    strokeWeight(3);
+                    ellipse(50 + b_size / 4, 250 + b_size / 3, b_size / 4, b_size / 4);
+                    ellipse(50 + b_size / 4 * 3, 250 + b_size / 3, b_size / 4, b_size / 4);
+                    noStroke();
+                    popMatrix();
+                }
+            }
+        };
+        
+        keyPressed = function() {
+            k[keyCode]=true;
+        };
+        
+        keyReleased = function() {
+            k[keyCode]=false;
+        };
+        
+        mouseClicked = function() {
+            if (mouseX > 200 && mouseY > 380 && mouseX < 400 && mouseY < 420) {
+            p = true;
+                }
+        };
+            
+            // by green ghost
+            {
+            // Moves the mouseX and mouseY variables.
+            canvas.addEventListener("mousemove", function(event) {
+                mouseX = event.pageX;
+                mouseY = event.pageY;
+            }, false);
+            
+            // Checks for key pressed events.
+            body.addEventListener("keydown", function(event) {
+                event.preventDefault();
+                keyCode = event.keyCode;
+                keyPressed();
+            }, false);
+            
+            // Checks for key released events.
+            body.addEventListener("keyup", function(event) {
+                event.preventDefault();
+                keyCode = event.keyCode;
+                keyReleased();
+            }, false);
+            // Checks for when the mouse is clicked.
+            body.addEventListener("mousedown", function(event) {
+                mouseClicked ();
+            }, false);
+            
+            // Uses the draw function and frameRate variable.
+            var intervalId = setInterval(function() {
+                frameCount ++;
+                draw()
+            }, 1000 / frameRate);
+            }
+        </script>
+    </body>
+</html>
